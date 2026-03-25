@@ -1,0 +1,48 @@
+'Print To PDF
+
+Sub PrintOneExcelToOnePDF()
+    Dim FilePath As String
+    Dim SavePath As String
+    Dim PDFName As String
+    Dim OriginalWorkbookName As String
+    Dim FileParts() As String
+
+    ' Prompt the user to select the Excel file
+    FilePath = Application.GetOpenFilename("Excel Files (*.xlsx), *.xlsx")
+    
+    If FilePath = "False" Then
+        MsgBox "No file selected. Exiting the macro."
+        Exit Sub
+    End If
+
+    ' Open the selected Excel file
+    Workbooks.Open (FilePath)
+    
+    ' Split the selected path to get the file name and extension
+    FileParts = Split(FilePath, Application.PathSeparator)
+    OriginalWorkbookName = FileParts(UBound(FileParts))
+    
+    ' Remove the file extension from the original workbook name
+    OriginalWorkbookName = Left(OriginalWorkbookName, InStrRev(OriginalWorkbookName, ".") - 1)
+    
+    ' Create the path for the folder where you want to save the PDF files
+    SavePath = "C:\DDD\temp\" ' Modify this to your desired folder path
+    
+    ' Check if the folder exists, and if not, create it
+    If Dir(SavePath, vbDirectory) = "" Then
+        MkDir SavePath
+    End If
+    
+    ' Create the full PDF file name using the specified path and the Excel file name
+    PDFName = SavePath & OriginalWorkbookName & ".pdf"
+    
+    ' Export all sheets to a single PDF file
+    ActiveWorkbook.ExportAsFixedFormat Type:=xlTypePDF, Filename:=PDFName, Quality:=xlQualityStandard, _
+        IncludeDocProperties:=True, IgnorePrintAreas:=False, OpenAfterPublish:=False
+    
+    ' Close the original Excel file without saving changes
+    ActiveWorkbook.Close SaveChanges:=False
+    ThisWorkbook.Activate
+    
+    MsgBox "PDF created successfully at " & PDFName, vbInformation, "Success"
+End Sub
